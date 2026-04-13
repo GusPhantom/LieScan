@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#0f172a">
+  <title>Lie Detector | Truth Scanner</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding: 20px;
+      transition: background 0.3s ease, color 0.2s;
+    }
+
+    body.dark {
+      background: linear-gradient(125deg, #0a0f2a, #0b1525, #0e1a2f, #0a0f2a);
+      background-size: 400% 400%;
+      animation: bgMove 14s ease infinite;
+      color: #f1f5f9;
+    }
+    body.dark .container {
+      background: rgba(15, 25, 45, 0.75);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    body.dark textarea {
+      background: rgba(10, 20, 35, 0.9);
+      color: white;
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+    body.dark .resultado {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    body.dark .modal-content {
+      background: #1e293b;
+      color: #f1f5f9;
+    }
+    body.dark .modal-checkbox {
+      background: #334155;
+    }
+
+    body.light {
+      background: linear-gradient(125deg, #e2e8f0, #cbd5e1, #f1f5f9);
+      background-size: 400% 400%;
+      animation: bgMove 14s ease infinite;
+      color: #0f172a;
+    }
+    body.light .container {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      box-shadow: 0 20px 35px rgba(0,0,0,0.1);
+    }
+    body.light textarea {
+      background: white;
+      color: #0f172a;
+      border-color: #22c55e;
+    }
+    body.light .resultado {
+      background: rgba(255, 255, 255, 0.85);
+      color: #0f172a;
+    }
+    body.light .loader-wrapper {
+      background: rgba(0,0,0,0.1);
+    }
+    body.light .sub, body.light .detalhe {
+      color: #334155;
+    }
+    body.light .modal-content {
+      background: white;
+      color: #0f172a;
+    }
+    body.light .modal-checkbox {
+      background: #e2e8f0;
+    }
+
+    body.high-contrast {
+      background: black !important;
+      animation: none !important;
+      color: yellow !important;
+    }
+    body.high-contrast .container {
+      background: black !important;
+      border: 3px solid yellow !important;
+      box-shadow: none !important;
+    }
+    body.high-contrast button {
+      background: yellow !important;
+      color: black !important;
+      border: 2px solid black;
+    }
+    body.high-contrast textarea {
+      background: black !important;
+      color: yellow !important;
+      border: 2px solid yellow !important;
+    }
+    body.high-contrast .resultado {
+      background: black !important;
+      border-left-color: yellow !important;
+      color: yellow !important;
+    }
+    body.high-contrast .modal-content {
+      background: black !important;
+      border: 2px solid yellow !important;
+      color: yellow !important;
+    }
+    body.high-contrast .modal-checkbox {
+      background: #333 !important;
+      border: 1px solid yellow !important;
+    }
+    body.high-contrast .modal-close {
+      background: yellow !important;
+      color: black !important;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      backdrop-filter: blur(14px);
+      border-radius: 2.5rem;
+      padding: 1.8rem;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #E0F2FE, #86EFAC, #4ADE80);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-area {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 10px 15px;
+      border-radius: 80px;
+    }
+    .detective {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 3rem;
+      transition: transform 0.2s;
+    }
+    .detective span {
+      font-size: 3rem;
+    }
+    .detective-label {
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .theme-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .icon-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 40px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      backdrop-filter: blur(4px);
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      padding: 14px;
+      border-radius: 24px;
+      font-size: 1rem;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 60px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.1s;
+    }
+    .btn-analyze { background: #22c55e; color: white; }
+    .btn-clear { background: #475569; color: white; }
+    .btn-example { background: #8b5cf6; color: white; }
+
+    .speedometer {
+      margin: 20px auto;
+      text-align: center;
+    }
+    canvas {
+      max-width: 200px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      margin-bottom: 8px;
+    }
+    .porcentagem-texto {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .loader-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 60px;
+      width: fit-content;
+      margin: 10px auto;
+    }
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid #22c55e;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .resultado {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 28px;
+      border-left: 6px solid;
+    }
+    .historico {
+      margin-top: 20px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 12px;
+    }
+    .historico-item {
+      padding: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+    }
+    .hidden { display: none; }
+    footer { font-size: 0.7rem; text-align: center; margin-top: 15px; opacity: 0.7; }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-content {
+      max-width: 450px;
+      width: 90%;
+      background: #1e293b;
+      border-radius: 28px;
+      padding: 28px 24px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      text-align: center;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-icon {
+      font-size: 3.5rem;
+      margin-bottom: 16px;
+    }
+    .modal-content h3 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+    .modal-content p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+    .modal-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .modal-checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 40px;
+      background: #334155;
+      font-size: 0.85rem;
+    }
+    .modal-checkbox input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .modal-close {
+      background: #22c55e;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      transition: transform 0.1s;
+    }
+    .modal-close:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body class="dark">
+<div class="container">
+  <div class="avatar-area">
+    <div class="detective" id="detectiveAvatar">
+      <span id="avatarIcon">🕵️‍♂️</span>
+      <span class="detective-label" id="avatarStatus">Detetive neutro</span>
+    </div>
+    <div class="theme-buttons">
+      <button class="icon-btn" id="themeDark" title="Modo escuro">🌙</button>
+      <button class="icon-btn" id="themeLight" title="Modo claro">☀️</button>
+      <button class="icon-btn" id="themeHighContrast" title="Alto contraste">♿</button>
+    </div>
+  </div>
+
+  <h1 id="mainTitle">🕵️ Detector de Mentira</h1>
+  <div class="sub" id="subtitle">Análise com detetive virtual + hesitação + velocímetro</div>
+
+  <textarea id="texto" placeholder="Digite algo... Ex: 'Juro que não fui eu, acredita...'"></textarea>
+  
+  <div class="button-group">
+    <button class="btn-analyze" id="analisarBtn">🔍 Analisar</button>
+    <button class="btn-clear" id="limparBtn">🧹 Limpar</button>
+    <button class="btn-example" id="exemploBtn">🎲 Exemplo aleatório</button>
+  </div>
+
+  <div class="speedometer">
+    <canvas id="gaugeCanvas" width="180" height="180" style="width:180px; height:180px"></canvas>
+    <div class="porcentagem-texto" id="porcentagemDisplay">0%</div>
+  </div>
+
+  <div id="loadingArea" class="loader-wrapper hidden">
+    <div class="loader"></div>
+    <div id="loadingText">Analisando discurso...</div>
+  </div>
+
+  <div id="resultadoArea" class="resultado hidden"></div>
+
+  <div class="historico" id="historicoArea">
+    <strong id="historyTitle">📋 Histórico de análises</strong>
+    <div id="historicoList">Nenhuma análise ainda</div>
+  </div>
+  <footer id="footerText">⚡ Funciona offline • Tema dinâmico • Hesitação detectada</footer>
+</div>
+
+<script>
+  // ======================== DICIONÁRIO COMPLETO ========================
+  const translations = {
+    pt: {
+      mainTitle: "🕵️ Detector de Mentira",
+      subtitle: "Análise com detetive virtual + hesitação + velocímetro",
+      textareaPlaceholder: "Digite algo... Ex: 'Juro que não fui eu, acredita...'",
+      analyzeBtn: "🔍 Analisar",
+      clearBtn: "🧹 Limpar",
+      exampleBtn: "🎲 Exemplo aleatório",
+      loadingText: "Analisando discurso...",
+      historyTitle: "📋 Histórico de análises",
+      noHistory: "Nenhuma análise ainda",
+      footer: "⚡ Funciona offline • Tema dinâmico • Hesitação detectada",
+      modalTitle: "Atenção, detetive!",
+      modalMsg: "O detector de mentira às vezes pode errar, então é melhor analisar o resultado com cautela. Este sistema é apenas uma ferramenta de apoio baseada em padrões de linguagem, não substitui uma investigação real.",
+      modalCheckbox: "Não mostrar novamente",
+      modalBtn: "OK, entendi",
+      avatarNeutral: "Detetive neutro",
+      avatarTruth: "Confiante! Parece verdade",
+      avatarSuspicious: "Desconfiado...",
+      avatarVerySuspicious: "Muito suspeito!",
+      avatarLie: "Mentira detectada!",
+      veryTrue: "Muito provavelmente Verdade",
+      lowDistortion: "Indícios baixos de distorção",
+      greyZone: "Zona cinzenta / Duvidoso",
+      highLie: "Alta chance de inverdade",
+      strongLie: "FORTÍSSIMA PROBABILIDADE DE MENTIRA",
+      noText: "📭 Nenhum texto inserido para análise",
+      emptyAnalysis: "Nenhum texto para analisar",
+      distortionIndex: "Índice de potencial de distorção",
+      exampleSentences: [
+        "Fui ao mercado hoje cedo, comprei pão, leite e frutas.",
+        "Juro que não fui eu, pode confiar em mim!",
+        "Ontem encontrei com João, vimos um filme e depois fomos jantar.",
+        "Sinceramente, eu não lembro o que aconteceu, talvez tenha sido algo assim... hum...",
+        "Com toda certeza, nunca faria isso, acredita em mim!",
+        "Terminei o relatório e enviei para o chefe na segunda-feira.",
+        "Não me recordo direito, acho que foi sem querer..."
+      ]
+    },
+    en: {
+      mainTitle: "🕵️ Lie Detector",
+      subtitle: "Virtual detective analysis + hesitation + speedometer",
+      textareaPlaceholder: "Type something... e.g. 'I swear it wasn't me, believe me...'",
+      analyzeBtn: "🔍 Analyze",
+      clearBtn: "🧹 Clear",
+      exampleBtn: "🎲 Random example",
+      loadingText: "Analyzing speech...",
+      historyTitle: "📋 Analysis History",
+      noHistory: "No analysis yet",
+      footer: "⚡ Works offline • Dynamic theme • Hesitation detection",
+      modalTitle: "Attention, detective!",
+      modalMsg: "The lie detector can sometimes be wrong, so please interpret results with caution. This is a supportive tool based on language patterns, not a real investigation.",
+      modalCheckbox: "Don't show again",
+      modalBtn: "OK, got it",
+      avatarNeutral: "Neutral detective",
+      avatarTruth: "Confident! Seems true",
+      avatarSuspicious: "Suspicious...",
+      avatarVerySuspicious: "Highly suspicious!",
+      avatarLie: "Lie detected!",
+      veryTrue: "Most likely Truth",
+      lowDistortion: "Low distortion indicators",
+      greyZone: "Grey zone / Doubtful",
+      highLie: "High chance of falsehood",
+      strongLie: "VERY HIGH PROBABILITY OF LIE",
+      noText: "📭 No text entered for analysis",
+      emptyAnalysis: "No text to analyze",
+      distortionIndex: "Distortion potential index",
+      exampleSentences: [
+        "I went to the market early today, bought bread, milk and fruits.",
+        "I swear it wasn't me, you can trust me!",
+        "Yesterday I met João, we watched a movie and then went to dinner.",
+        "Honestly, I don't remember what happened, maybe it was something like... hmm...",
+        "With absolute certainty, I would never do that, believe me!",
+        "I finished the report and sent it to the boss on Monday.",
+        "I don't really remember, I think it was unintentional..."
+      ]
+    },
+    es: {
+      mainTitle: "🕵️ Detector de Mentiras",
+      subtitle: "Análisis con detective virtual + vacilación + velocímetro",
+      textareaPlaceholder: "Escribe algo... Ej: 'Juro que no fui yo, créeme...'",
+      analyzeBtn: "🔍 Analizar",
+      clearBtn: "🧹 Limpiar",
+      exampleBtn: "🎲 Ejemplo aleatorio",
+      loadingText: "Analizando discurso...",
+      historyTitle: "📋 Historial de análisis",
+      noHistory: "Sin análisis aún",
+      footer: "⚡ Funciona offline • Tema dinámico • Vacilación detectada",
+      modalTitle: "¡Atención, detective!",
+      modalMsg: "El detector de mentiras a veces puede fallar, por eso es mejor analizar el resultado con precaución. Esta es una herramienta de apoyo basada en patrones lingüísticos.",
+      modalCheckbox: "No mostrar de nuevo",
+      modalBtn: "OK, entendido",
+      avatarNeutral: "Detective neutral",
+      avatarTruth: "¡Confiable! Parece verdad",
+      avatarSuspicious: "Sospechoso...",
+      avatarVerySuspicious: "¡Muy sospechoso!",
+      avatarLie: "¡Mentira detectada!",
+      veryTrue: "Muy probablemente Verdad",
+      lowDistortion: "Indicios bajos de distorsión",
+      greyZone: "Zona gris / Dudoso",
+      highLie: "Alta probabilidad de falsedad",
+      strongLie: "PROBABILIDAD ALTÍSIMA DE MENTIRA",
+      noText: "📭 No se ingresó texto para analizar",
+      emptyAnalysis: "Sin texto para analizar",
+      distortionIndex: "Índice de potencial de distorsión",
+      exampleSentences: [
+        "Fui al mercado temprano hoy, compré pan, leche y frutas.",
+        "¡Juro que no fui yo, puedes confiar en mí!",
+        "Ayer me encontré con Juan, vimos una película y luego fuimos a cenar.",
+        "Sinceramente, no recuerdo lo que pasó, tal vez fue algo así... um...",
+        "Con toda certeza, nunca haría eso, ¡créeme!",
+        "Terminé el informe y lo envié al jefe el lunes.",
+        "No recuerdo bien, creo que fue sin querer..."
+      ]
+    },
+    fr: {
+      mainTitle: "🕵️ Détecteur de Mensonges",
+      subtitle: "Analyse avec détective virtuel + hésitation + vélocimètre",
+      textareaPlaceholder: "Écrivez quelque chose... Ex: 'Je jure que ce n'était pas moi, croyez-moi...'",
+      analyzeBtn: "🔍 Analyser",
+      clearBtn: "🧹 Effacer",
+      exampleBtn: "🎲 Exemple aléatoire",
+      loadingText: "Analyse du discours...",
+      historyTitle: "📋 Historique des analyses",
+      noHistory: "Aucune analyse encore",
+      footer: "⚡ Fonctionne hors ligne • Thème dynamique • Hésitation détectée",
+      modalTitle: "Attention, détective !",
+      modalMsg: "Le détecteur de mensonges peut parfois se tromper, il est donc préférable d'interpréter les résultats avec prudence. Outil basé sur des modèles de langage.",
+      modalCheckbox: "Ne plus afficher",
+      modalBtn: "OK, compris",
+      avatarNeutral: "Détective neutre",
+      avatarTruth: "Confiante ! Semble vrai",
+      avatarSuspicious: "Suspect...",
+      avatarVerySuspicious: "Très suspect !",
+      avatarLie: "Mensonge détecté !",
+      veryTrue: "Très probablement Vrai",
+      lowDistortion: "Faibles indices de distorsion",
+      greyZone: "Zone grise / Douteux",
+      highLie: "Fort risque de mensonge",
+      strongLie: "PROBABILITÉ TRÈS ÉLEVÉE DE MENSONGE",
+      noText: "📭 Aucun texte saisi",
+      emptyAnalysis: "Pas de texte à analyser",
+      distortionIndex: "Indice de distorsion potentielle",
+      exampleSentences: [
+        "Je suis allé au marché tôt ce matin, j'ai acheté du pain, du lait et des fruits.",
+        "Je jure que ce n'était pas moi, vous pouvez me faire confiance !",
+        "Hier, j'ai rencontré Jean, nous avons regardé un film puis sommes allés dîner.",
+        "Honnêtement, je ne me souviens pas de ce qui s'est passé, c'était peut-être quelque chose comme... euh...",
+        "Avec une certitude absolue, je ne ferais jamais ça, croyez-moi !",
+        "J'ai fini le rapport et je l'ai envoyé au patron lundi.",
+        "Je ne me souviens pas bien, je pense que c'était involontaire..."
+      ]
+    },
+    de: {
+      mainTitle: "🕵️ Lügendetektor",
+      subtitle: "Analyse mit virtuellem Detektiv + Zögern + Tachometer",
+      textareaPlaceholder: "Gib etwas ein... z.B. 'Ich schwöre, ich war es nicht, glaub mir...'",
+      analyzeBtn: "🔍 Analysieren",
+      clearBtn: "🧹 Löschen",
+      exampleBtn: "🎲 Zufälliges Beispiel",
+      loadingText: "Sprachanalyse läuft...",
+      historyTitle: "📋 Verlaufsprotokoll",
+      noHistory: "Noch keine Analysen",
+      footer: "⚡ Offline nutzbar • Dynamisches Thema • Zögern erkannt",
+      modalTitle: "Achtung, Detektiv!",
+      modalMsg: "Der Lügendetektor kann manchmal falsch liegen. Dieses Tool basiert auf Sprachmustern und ersetzt keine echte Untersuchung.",
+      modalCheckbox: "Nicht mehr anzeigen",
+      modalBtn: "OK, verstanden",
+      avatarNeutral: "Neutraler Detektiv",
+      avatarTruth: "Vertrauenswürdig! Scheint wahr",
+      avatarSuspicious: "Verdächtig...",
+      avatarVerySuspicious: "Sehr verdächtig!",
+      avatarLie: "Lüge erkannt!",
+      veryTrue: "Sehr wahrscheinlich Wahrheit",
+      lowDistortion: "Geringe Verzerrungsanzeichen",
+      greyZone: "Grauzone / Zweifelhaft",
+      highLie: "Hohe Wahrscheinlichkeit einer Lüge",
+      strongLie: "SEHR HOHE LÜGENWAHRSCHEINLICHKEIT",
+      noText: "📭 Kein Text eingegeben",
+      emptyAnalysis: "Kein Text zum Analysieren",
+      distortionIndex: "Verzerrungspotential-Index",
+      exampleSentences: [
+        "Ich war heute früh auf dem Markt und habe Brot, Milch und Obst gekauft.",
+        "Ich schwöre, ich war es nicht, vertrau mir!",
+        "Gestern traf ich João, wir sahen einen Film und gingen dann essen.",
+        "Ehrlich gesagt, ich erinnere mich nicht, was passiert ist, vielleicht war es so... ähm...",
+        "Mit absoluter Sicherheit würde ich das niemals tun, glaub mir!",
+        "Ich habe den Bericht fertiggestellt und am Montag an den Chef geschickt.",
+        "Ich kann mich nicht genau erinnern, ich glaube, es war unbeabsichtigt..."
+      ]
+    },
+    it: {
+      mainTitle: "🕵️ Rilevatore di Bugie",
+      subtitle: "Analisi con detective virtuale + esitazione + tachimetro",
+      textareaPlaceholder: "Scrivi qualcosa... Es: 'Giuro che non sono stato io, credimi...'",
+      analyzeBtn: "🔍 Analizza",
+      clearBtn: "🧹 Cancella",
+      exampleBtn: "🎲 Esempio casuale",
+      loadingText: "Analisi del discorso...",
+      historyTitle: "📋 Cronologia analisi",
+      noHistory: "Nessuna analisi ancora",
+      footer: "⚡ Funziona offline • Tema dinamico • Esitazione rilevata",
+      modalTitle: "Attenzione, detective!",
+      modalMsg: "Il rilevatore di bugie può talvolta sbagliare, quindi è meglio analizzare con cautela. Strumento basato su pattern linguistici.",
+      modalCheckbox: "Non mostrare più",
+      modalBtn: "OK, capito",
+      avatarNeutral: "Detective neutrale",
+      avatarTruth: "Fiducioso! Sembra vero",
+      avatarSuspicious: "Sospetto...",
+      avatarVerySuspicious: "Molto sospetto!",
+      avatarLie: "Bugia rilevata!",
+      veryTrue: "Molto probabilmente Vero",
+      lowDistortion: "Bassi indicatori di distorsione",
+      greyZone: "Zona grigia / Dubbio",
+      highLie: "Alta probabilità di falsità",
+      strongLie: "ALTISSIMA PROBABILITÀ DI BUGIA",
+      noText: "📭 Nessun testo inserito",
+      emptyAnalysis: "Nessun testo da analizzare",
+      distortionIndex: "Indice di potenziale distorsione",
+      exampleSentences: [
+        "Sono andato al mercato stamattina presto, ho comprato pane, latte e frutta.",
+        "Giuro che non sono stato io, puoi fidarti di me!",
+        "Ieri ho incontrato João, abbiamo visto un film e poi siamo andati a cena.",
+        "Sinceramente, non ricordo cosa sia successo, forse è stato qualcosa come... umm...",
+        "Con assoluta certezza, non lo farei mai, credimi!",
+        "Ho finito il rapporto e l'ho inviato al capo lunedì.",
+        "Non ricordo bene, penso sia stato involontario..."
+      ]
+    },
+    ja: {
+      mainTitle: "🕵️ 嘘発見器",
+      subtitle: "仮想探偵による分析 + ためらい + スピードメーター",
+      textareaPlaceholder: "何か入力してください... 例: '私じゃないと誓います、信じて...'",
+      analyzeBtn: "🔍 分析",
+      clearBtn: "🧹 クリア",
+      exampleBtn: "🎲 ランダム例",
+      loadingText: "発言を分析中...",
+      historyTitle: "📋 分析履歴",
+      noHistory: "まだ分析はありません",
+      footer: "⚡ オフライン動作 • 動的テーマ • ためらい検出",
+      modalTitle: "注意、探偵！",
+      modalMsg: "嘘発見器は時々間違えることがあります。言語パターンに基づく補助ツールであり、実際の調査に代わるものではありません。",
+      modalCheckbox: "今後表示しない",
+      modalBtn: "OK、理解しました",
+      avatarNeutral: "中立な探偵",
+      avatarTruth: "信頼できる！真実に見える",
+      avatarSuspicious: "疑わしい...",
+      avatarVerySuspicious: "非常に疑わしい！",
+      avatarLie: "嘘を検出！",
+      veryTrue: "ほぼ間違いなく真実",
+      lowDistortion: "歪みの兆候が低い",
+      greyZone: "グレーゾーン / 疑わしい",
+      highLie: "虚偽の可能性が高い",
+      strongLie: "嘘の可能性が非常に高い",
+      noText: "📭 分析するテキストがありません",
+      emptyAnalysis: "分析するテキストがありません",
+      distortionIndex: "歪み可能性指数",
+      exampleSentences: [
+        "今朝早く市場に行って、パン、牛乳、果物を買いました。",
+        "私じゃないと誓います、信じてください！",
+        "昨日ジョアンに会って、映画を見てから夕食に行きました。",
+        "正直なところ、何が起こったか覚えていません、たぶん...ええと...",
+        "絶対にそんなことはしません、信じてください！",
+        "月曜日にレポートを終えて上司に送りました。",
+        "よく覚えていません、意図的ではなかったと思います..."
+      ]
+    }
+  };
+
+  let currentLang = 'pt';
+  
+  function detectLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage;
+    if (browserLang.startsWith('en')) return 'en';
+    if (browserLang.startsWith('es')) return 'es';
+    if (browserLang.startsWith('fr')) return 'fr';
+    if (browserLang.startsWith('de')) return 'de';
+    if (browserLang.startsWith('it')) return 'it';
+    if (browserLang.startsWith('ja')) return 'ja';
+    return 'pt';
+  }
+
+  function t(key) {
+    return translations[currentLang][key] || translations.pt[key] || key;
+  }
+
+  function applyTranslations() {
+    document.getElementById('mainTitle').innerHTML = t('mainTitle');
+    document.getElementById('subtitle').innerText = t('subtitle');
+    document.getElementById('texto').placeholder = t('textareaPlaceholder');
+    document.getElementById('analisarBtn').innerHTML = t('analyzeBtn');
+    document.getElementById('limparBtn').innerHTML = t('clearBtn');
+    document.getElementById('exemploBtn').innerHTML = t('exampleBtn');
+    document.getElementById('loadingText').innerText = t('loadingText');
+    document.getElementById('historyTitle').innerHTML = t('historyTitle');
+    document.getElementById('footerText').innerText = t('footer');
+    if (document.getElementById('historicoList').innerHTML === "Nenhuma análise ainda" || 
+        document.getElementById('historicoList').innerHTML === "No analysis yet" ||
+        document.getElementById('historicoList').innerHTML === "Sin análisis aún") {
+      document.getElementById('historicoList').innerHTML = t('noHistory');
+    }
+  }
+
+  // ======================== MODAL TRADUZIDO ========================
+  function mostrarAvisoInicial() {
+    const naoMostrarNovamente = localStorage.getItem("detectorNaoMostrarAviso");
+    if (naoMostrarNovamente === "true") return;
+    
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-icon">⚠️🔍</div>
+        <h3>${t('modalTitle')}</h3>
+        <p>${t('modalMsg')}</p>
+        <div class="modal-options">
+          <label class="modal-checkbox">
+            <input type="checkbox" id="naoMostrarCheckbox">
+            <span>${t('modalCheckbox')}</span>
+          </label>
+        </div>
+        <button class="modal-close" id="fecharModalBtn">${t('modalBtn')}</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    
+    const fecharBtn = document.getElementById("fecharModalBtn");
+    const checkbox = document.getElementById("naoMostrarCheckbox");
+    
+    const fecharModal = () => {
+      if (checkbox && checkbox.checked) {
+        localStorage.setItem("detectorNaoMostrarAviso", "true");
+      }
+      overlay.remove();
+    };
+    
+    fecharBtn.addEventListener("click", fecharModal);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) fecharModal();
+    });
+  }
+  
+  // ======================== HISTÓRICO ========================
+  let historico = [];
+  function carregarHistorico() {
+    const saved = localStorage.getItem("detectorHistorico");
+    if(saved) historico = JSON.parse(saved);
+    atualizarUIHistorico();
+  }
+  function salvarHistorico() {
+    localStorage.setItem("detectorHistorico", JSON.stringify(historico.slice(0, 12)));
+    atualizarUIHistorico();
+  }
+  function adicionarAoHistorico(texto, porcentagem, statusKey) {
+    const statusText = t(statusKey);
+    const novo = {
+      id: Date.now(),
+      texto: texto.length > 45 ? texto.substring(0,45)+"..." : texto,
+      porcentagem,
+      status: statusText,
+      data: new Date().toLocaleTimeString()
+    };
+    historico.unshift(novo);
+    if(historico.length > 12) historico.pop();
+    salvarHistorico();
+  }
+  function atualizarUIHistorico() {
+    const container = document.getElementById("historicoList");
+    if(!container) return;
+    if(historico.length === 0) {
+      container.innerHTML = t('noHistory');
+      return;
+    }
+    container.innerHTML = historico.map(item => `
+      <div class="historico-item">
+        <span>${item.texto}</span>
+        <span style="font-weight:bold; color:${item.porcentagem>65?'#f97316':'#4ade80'}">${item.porcentagem}%</span>
+        <span style="font-size:0.7rem">${item.data}</span>
+      </div>
+    `).join('');
+  }
+
+  // ======================== ANÁLISE ========================
+  function detectarHesitacao(texto) {
+    const padroes = [/\.{3,}/g, /ah( |$)/gi, /hum( |$)/gi, /tipo assim/gi, /sei lá/gi, /é\.\.\./gi, /hmm/gi, /ahn/gi, /eh\.\.\./gi];
+    let count = 0;
+    padroes.forEach(p => { const matches = texto.match(p); if(matches) count += matches.length; });
+    return { hesitacao: count, temHesitacao: count > 0 };
+  }
+
+  function analisarTextoCompleto(texto) {
+    if (!texto || texto.trim().length === 0) {
+      return { porcentagem: 0, fatores: [t('emptyAnalysis')], hesitacao: false };
+    }
+    const textoLow = texto.toLowerCase();
+    const comprimento = texto.length;
+    let pontuacaoTotal = 0;
+    let fatores = [];
+    const indicadores = [
+      { nome: "Juramentos excessivos", palavras: ["juro", "acredita", "confia em mim", "eu juro", "pode confiar", "acredite"], peso: 12 },
+      { nome: "Defesa exagerada", palavras: ["nunca faria", "sempre falo", "eu não faria", "jamais mentiria", "não sou mentiroso", "com toda certeza", "garanto", "prometo"], peso: 12 },
+      { nome: "Vaguidão", palavras: ["coisa", "algo assim", "talvez", "mais ou menos", "sei lá", "tipo assim"], peso: 10 },
+      { nome: "Esquecimento seletivo", palavras: ["não lembro", "não me recordo", "esqueci", "não sei dizer"], peso: 10 },
+      { nome: "Contradição potencial", palavras: ["na verdade", "mas depois", "na verdade não", "mentira"], peso: 8 }
+    ];
+    indicadores.forEach(ind => {
+      let encontrou = false;
+      ind.palavras.forEach(palavra => {
+        if (textoLow.includes(palavra)) encontrou = true;
+      });
+      if (encontrou) {
+        pontuacaoTotal += ind.peso;
+        fatores.push(`🔍 ${ind.nome}`);
+      }
+    });
+    if (comprimento > 300) { pontuacaoTotal += 8; fatores.push("📜 Texto excessivamente longo"); }
+    else if (comprimento > 200) { pontuacaoTotal += 5; fatores.push("📝 Texto longo"); }
+    else if (comprimento < 20 && comprimento > 5) { pontuacaoTotal += 8; fatores.push("🔇 Resposta muito curta"); }
+    else if (comprimento < 5 && comprimento > 0) { pontuacaoTotal += 12; fatores.push("⚠️ Extremamente curto"); }
+    const { temHesitacao, hesitacao } = detectarHesitacao(texto);
+    if (temHesitacao) { pontuacaoTotal += Math.min(12, hesitacao * 3); fatores.push(`🗣️ Hesitação detectada (${hesitacao})`); }
+    const exclamacoes = (texto.match(/!+/g) || []).length;
+    if (exclamacoes > 2) pontuacaoTotal += Math.min(10, exclamacoes * 2);
+    if (textoLow.includes("nunca") && textoLow.includes("sempre")) { pontuacaoTotal += 10; fatores.push("⚡ Contradição interna"); }
+    const temIndicador = fatores.some(f => f.includes("🔍") || f.includes("🗣️") || f.includes("⚠️"));
+    if (!temIndicador && comprimento > 30) { pontuacaoTotal = Math.max(0, pontuacaoTotal - 15); fatores.push("✅ Discurso neutro e direto"); }
+    let porcentagem = Math.min(98, Math.max(0, Math.floor(pontuacaoTotal * 1.2)));
+    if (!temIndicador && comprimento > 40 && !textoLow.includes("juro") && !textoLow.includes("nunca")) porcentagem = Math.min(porcentagem, 28);
+    return { porcentagem, fatores, hesitacao: temHesitacao };
+  }
+
+  function desenharVelocimetro(porcentagem) {
+    const canvas = document.getElementById("gaugeCanvas");
+    if(!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const anguloInicio = -Math.PI * 0.75;
+    const anguloFim = Math.PI * 0.75;
+    const valorAngulo = anguloInicio + (porcentagem/100) * (anguloFim - anguloInicio);
+    ctx.beginPath();
+    ctx.arc(w/2, h/2, w*0.38, 0, 2*Math.PI);
+    ctx.fillStyle = document.body.classList.contains('light') ? "rgba(0,0,0,0.1)" : "rgba(0,0,0,0.4)";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(w/2, h/2, w*0.38, anguloInicio, anguloFim);
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 14;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(w/2, h/2, w*0.38, anguloInicio, valorAngulo);
+    let cor = "#22c55e";
+    if(porcentagem > 65) cor = "#f97316";
+    if(porcentagem > 85) cor = "#ef4444";
+    ctx.strokeStyle = cor;
+    ctx.lineWidth = 14;
+    ctx.stroke();
+    const raioPonteiro = w*0.32;
+    const xP = w/2 + Math.cos(valorAngulo) * raioPonteiro;
+    const yP = h/2 + Math.sin(valorAngulo) * raioPonteiro;
+    ctx.beginPath();
+    ctx.moveTo(w/2, h/2);
+    ctx.lineTo(xP, yP);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#facc15";
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(w/2, h/2, 8, 0, 2*Math.PI);
+    ctx.fillStyle = "#facc15";
+    ctx.fill();
+    document.getElementById("porcentagemDisplay").innerText = `${porcentagem}%`;
+  }
+
+  function atualizarAvatar(porcentagem) {
+    const avatarSpan = document.getElementById("avatarIcon");
+    const statusSpan = document.getElementById("avatarStatus");
+    if(porcentagem <= 20) { avatarSpan.innerText = "😇🕵️"; statusSpan.innerText = t('avatarTruth'); }
+    else if(porcentagem <= 45) { avatarSpan.innerText = "🧐🕵️"; statusSpan.innerText = t('avatarSuspicious'); }
+    else if(porcentagem <= 70) { avatarSpan.innerText = "🤨🔍"; statusSpan.innerText = t('avatarVerySuspicious'); }
+    else { avatarSpan.innerText = "🚨😠"; statusSpan.innerText = t('avatarLie'); }
+  }
+
+  async function iniciarAnalise() {
+    const texto = document.getElementById("texto").value;
+    const loading = document.getElementById("loadingArea");
+    const resultadoDiv = document.getElementById("resultadoArea");
+    const btn = document.getElementById("analisarBtn");
+    resultadoDiv.classList.add("hidden");
+    loading.classList.remove("hidden");
+    btn.disabled = true;
+    setTimeout(() => {
+      const { porcentagem, fatores, hesitacao } = analisarTextoCompleto(texto);
+      desenharVelocimetro(porcentagem);
+      atualizarAvatar(porcentagem);
+      let statusKey = "", icone = "", cor = "#22c55e";
+      if(porcentagem <= 20) { statusKey = "veryTrue"; icone = "🟢✅"; cor="#22c55e"; }
+      else if(porcentagem <= 40) { statusKey = "lowDistortion"; icone = "🟢🔍"; cor="#86efac"; }
+      else if(porcentagem <= 60) { statusKey = "greyZone"; icone = "🟡⚠️"; cor="#eab308"; }
+      else if(porcentagem <= 80) { statusKey = "highLie"; icone = "🟠🔴"; cor="#f97316"; }
+      else { statusKey = "strongLie"; icone = "🔴🚨"; cor="#ef4444"; }
+      const statusText = t(statusKey);
+      const fatoresHtml = fatores.length ? fatores.slice(0,5).map(f=>`• ${f}`).join('<br>') : `• ${t('lowDistortion')}`;
+      resultadoDiv.style.borderLeftColor = cor;
+      resultadoDiv.innerHTML = `<div style="display:flex; justify-content:space-between;"><span style="font-size:1.5rem;">${icone} ${statusText}</span></div>
+        <div style="margin-top:12px;"><div>📊 ${fatoresHtml}</div><div style="margin-top:8px;">🎯 ${t('distortionIndex')}: <strong>${porcentagem}%</strong></div></div>`;
+      if(!texto || texto.trim().length === 0) resultadoDiv.innerHTML = `<div>${t('noText')}</div>`;
+      else adicionarAoHistorico(texto, porcentagem, statusKey);
+      loading.classList.add("hidden");
+      resultadoDiv.classList.remove("hidden");
+      btn.disabled = false;
+    }, 500);
+  }
+  
+  function limparTudo() {
+    document.getElementById("texto").value = "";
+    document.getElementById("resultadoArea").classList.add("hidden");
+    desenharVelocimetro(0);
+    atualizarAvatar(0);
+    document.getElementById("porcentagemDisplay").innerText = "0%";
+  }
+  
+  function exemploAleatorio() {
+    const exemplos = t('exampleSentences');
+    const rand = Math.floor(Math.random() * exemplos.length);
+    document.getElementById("texto").value = exemplos[rand];
+    document.getElementById("resultadoArea").classList.add("hidden");
+    desenharVelocimetro(0);
+    atualizarAvatar(0);
+  }
+  
+  function setTheme(theme) {
+    const body = document.body;
+    body.classList.remove("dark", "light", "high-contrast");
+    if(theme === 'dark') body.classList.add("dark");
+    else if(theme === 'light') body.classList.add("light");
+    else if(theme === 'high-contrast') body.classList.add("high-contrast");
+    localStorage.setItem("detectorTheme", theme);
+    const porc = parseInt(document.getElementById("porcentagemDisplay")?.innerText || "0");
+    desenharVelocimetro(porc);
+  }
+  
+  function carregarTemaSalvo() {
+    const saved = localStorage.getItem("detectorTheme");
+    if(saved === 'light') setTheme('light');
+    else if(saved === 'high-contrast') setTheme('high-contrast');
+    else setTheme('dark');
+  }
+  
+  // ======================== INICIALIZAÇÃO ========================
+  window.onload = () => {
+    currentLang = detectLanguage();
+    applyTranslations();
+    carregarHistorico();
+    carregarTemaSalvo();
+    desenharVelocimetro(0);
+    atualizarAvatar(0);
+    mostrarAvisoInicial();
+    document.getElementById("analisarBtn").onclick = iniciarAnalise;
+    document.getElementById("limparBtn").onclick = limparTudo;
+    document.getElementById("exemploBtn").onclick = exemploAleatorio;
+    document.getElementById("themeDark").onclick = () => setTheme('dark');
+    document.getElementById("themeLight").onclick = () => setTheme('light');
+    document.getElementById("themeHighContrast").onclick = () => setTheme('high-contrast');
+  };
+</script>
+</body>
+</html>
